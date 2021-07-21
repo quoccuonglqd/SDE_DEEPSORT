@@ -6,6 +6,9 @@ import torch
 import warnings
 import numpy as np
 
+from detectron2.engine import DefaultPredictor, AsyncPredictor
+from detectron2 import model_zoo
+
 from detector import build_detector
 from deep_sort import build_tracker
 from utils.draw import draw_boxes
@@ -15,11 +18,13 @@ from utils.io import write_results
 
 from InferrenceDataIter import *
 
+
+
 class Tracker(object):
-    def __init__(self, cfg, args, video_path):
+    def __init__(self, cfg, args, path):
         self.cfg = cfg
         self.args = args
-        self.video_path = video_path
+        self.video_path = path
         self.logger = get_logger("root")
 
         use_cuda = args.use_cuda and torch.cuda.is_available()
@@ -30,28 +35,36 @@ class Tracker(object):
             cv2.namedWindow("test", cv2.WINDOW_NORMAL)
             cv2.resizeWindow("test", args.display_width, args.display_height)
 
-        if args.cam != -1:
-            print("Using webcam " + str(args.cam))
-            self.vdo = cv2.VideoCapture(args.cam)
+        if args.INPUT_TYPE == 'imageset': 
+            self.sequence = ImageSetIter(path)
+        # elif args.cam != -1:
+        elif args.INPUT_TYPE == 'webcam':
+            # print("Using webcam " + str(args.cam))
+            # self.vdo = cv2.VideoCapture(args.cam)
+            self.sequence = WebcamIter()
         else:
-            self.vdo = cv2.VideoCapture()
-        self.detector = build_detector(cfg, use_cuda=use_cuda)
+            # self.vdo = cv2.VideoCapture()
+            self.sequence = VideoIter(path)
+        # self.detector = build_detector(cfg, use_cuda=use_cuda)
+        self.detector = DefaultPredictor(cfg)
         self.deepsort = build_tracker(cfg, use_cuda=use_cuda)
         self.class_names = self.detector.class_names
 
     def __enter__(self):
-        if self.args.cam != -1:
-            ret, frame = self.vdo.read()
-            assert ret, "Error: Camera error"
-            self.im_width = frame.shape[0]
-            self.im_height = frame.shape[1]
+        # if self.args.cam != -1:
+        #     ret, frame = self.vdo.read()
+        #     assert ret, "Error: Camera error"
+        #     self.im_width = frame.shape[0]
+        #     self.im_height = frame.shape[1]
 
-        else:
-            assert os.path.isfile(self.video_path), "Path error"
-            self.vdo.open(self.video_path)
-            self.im_width = int(self.vdo.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.im_height = int(self.vdo.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            assert self.vdo.isOpened()
+        # else:
+        #     assert os.path.isfile(self.video_path), "Path error"
+        #     self.vdo.open(self.video_path)
+        #     self.im_width = int(self.vdo.get(cv2.CAP_PROP_FRAME_WIDTH))
+        #     self.im_height = int(self.vdo.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        #     assert self.vdo.isOpened()
+        self.im_width = self.sequence.im_width
+        self.im_height = self.sequence.im_height
 
         if self.args.save_path:
             os.makedirs(self.args.save_path, exist_ok=True)
@@ -76,25 +89,36 @@ class Tracker(object):
     def run(self):
         results = []
         idx_frame = 0
-        while self.vdo.grab():
+        # while self.vdo.grab():
+        for ori_im in self.sequence:
             idx_frame += 1
             if idx_frame % self.args.frame_interval:
                 continue
 
             start = time.time()
-            _, ori_im = self.vdo.retrieve()
+            # _, ori_im = self.vdo.retrieve()
             im = cv2.cvtColor(ori_im, cv2.COLOR_BGR2RGB)
 
-            # do detection
-            bbox_xywh, cls_conf, cls_ids = self.detector(im)
+            # do yolo detection
+            # bbox_xywh, cls_conf, cls_ids = self.detector(im)
+
+            # do detectron2 detection
+            outputs = self.detector(im)
+            bbox_ltrb = outputs['instances'].pred_boxes.tensor.cpu().numpy().tolist()
+            cls_ids = outputs['instances'].pred_classes.cpu().numpy().tolist()
+            cls_conf = outputs['instances'].scores.cpu().numpy().tolist()
+            bbox_xywh = bbox_ltrb.copy()
+            bbox_xywh[2:] -= bbox_xywh[:2]
+            bbox_xywh[:2] += bbox_xywh[2:] / 2
+
 
             # select person class
-            mask = cls_ids == 0
+            # mask = cls_ids == 0
 
-            bbox_xywh = bbox_xywh[mask]
+            # bbox_xywh = bbox_xywh[mask]
             # bbox dilation just in case bbox too small, delete this line if using a better pedestrian detector
-            bbox_xywh[:, 3:] *= 1.2
-            cls_conf = cls_conf[mask]
+            # bbox_xywh[:, 3:] *= 1.2
+            # cls_conf = cls_conf[mask]
 
             # do tracking
             outputs = self.deepsort.update(bbox_xywh, cls_conf, im)
@@ -151,6 +175,19 @@ if __name__ == "__main__":
     cfg = get_config()
     cfg.merge_from_file(args.config_detection)
     cfg.merge_from_file(args.config_deepsort)
+
+    
+    cfg.merge_from_file(model_zoo.get_config_file("COCO-Detection/faster_rcnn_R_101_FPN_3x.yaml"))
+    cfg.DATALOADER.NUM_WORKERS = 2
+    cfg.MODEL.WEIGHTS = '/content/drive/MyDrive/vehicle_speed_estimation/Model weight/Model detection AIC team Khanh/Faster_RCNN/R_101_FPN_augmented_6k_proposal256.pth' 
+    cfg.SOLVER.IMS_PER_BATCH = 1
+    # cfg.SOLVER.BASE_LR = 0.00025 
+    # cfg.SOLVER.MAX_ITER = 11000                                  #set cao hơn so với pretrain, pretrain 1000 thì ở đây 1001 trở lên
+    cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256  
+    cfg.MODEL.ROI_HEADS.NUM_CLASSES = 5
+    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.4
+    # cfg.MODEL.RETINANET.SCORE_THRESH_TEST = 0.5
+    
 
     with Tracker(cfg, args, path=args.input_path) as vdo_trk:
         vdo_trk.run()
