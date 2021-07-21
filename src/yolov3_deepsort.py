@@ -13,8 +13,9 @@ from utils.parser import get_config
 from utils.log import get_logger
 from utils.io import write_results
 
+from InferrenceDataIter import *
 
-class VideoTracker(object):
+class Tracker(object):
     def __init__(self, cfg, args, video_path):
         self.cfg = cfg
         self.args = args
@@ -129,7 +130,9 @@ class VideoTracker(object):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("VIDEO_PATH", type=str)
+    parser.add_argument("--INPUT_TYPE",choices= ['imageset','video','webcam'],help = 'Type of inputs')
+    parser.add_argument("--input_path", type = str, default = '')
+    # parser.add_argument("VIDEO_PATH", type=str)
     parser.add_argument("--config_detection", type=str, default="./configs/yolov3.yaml")
     parser.add_argument("--config_deepsort", type=str, default="./configs/deep_sort.yaml")
     # parser.add_argument("--ignore_display", dest="display", action="store_false", default=True)
@@ -149,5 +152,5 @@ if __name__ == "__main__":
     cfg.merge_from_file(args.config_detection)
     cfg.merge_from_file(args.config_deepsort)
 
-    with VideoTracker(cfg, args, video_path=args.VIDEO_PATH) as vdo_trk:
+    with Tracker(cfg, args, path=args.input_path) as vdo_trk:
         vdo_trk.run()

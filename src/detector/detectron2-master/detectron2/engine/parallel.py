@@ -5,7 +5,7 @@ import multiprocessing as mp
 from collections import deque
 import cv2
 import torch
-from defaults import *
+from .defaults import *
 
 __all__ = [
     "AsyncPredictor",
