@@ -6,7 +6,7 @@ import torch
 import warnings
 import numpy as np
 
-from detector import build_detector
+from detector import build_yolov3_detector, build_detectron2_detector
 from deep_sort import build_tracker
 from utils.draw import draw_boxes
 from utils.parser import get_config
@@ -18,7 +18,7 @@ from utils.InferrenceDataIter import *
 
 
 class Tracker(object):
-    def __init__(self, cfg, args, path):
+    def __init__(self, cfg, args, path, detector):
         self.cfg = cfg
         self.args = args
         self.video_path = path
@@ -42,7 +42,7 @@ class Tracker(object):
         else:
             # self.vdo = cv2.VideoCapture()
             self.sequence = VideoIter(path)
-        self.detector = build_detector(cfg, use_cuda=use_cuda)
+        self.detector = detector
         self.deepsort = build_tracker(cfg, use_cuda=use_cuda)
         self.class_names = self.detector.class_names
 
@@ -95,7 +95,7 @@ class Tracker(object):
             # _, ori_im = self.vdo.retrieve()
             im = cv2.cvtColor(ori_im, cv2.COLOR_BGR2RGB)
 
-            # do yolo detection
+            # do detection
             bbox_xywh, cls_conf, cls_ids = self.detector(im)
 
 
@@ -161,6 +161,9 @@ if __name__ == "__main__":
     args = parse_args()
     cfg = get_config()
     cfg.merge_from_file(args.config_deepsort)
+
+    detector = build_yolov3_detector(args.config_detection)
+    # detector = build_detectron2_detector(args.config_detection)
     
-    with Tracker(cfg, args, path=args.input_path) as vdo_trk:
+    with Tracker(cfg, args, path=args.input_path, detector = detector) as vdo_trk:
         vdo_trk.run()
