@@ -44,7 +44,6 @@ class Tracker(object):
             self.sequence = VideoIter(path)
         self.detector = detector
         self.deepsort = build_tracker(cfg, use_cuda=use_cuda)
-        self.class_names = self.detector.class_names
 
     def __enter__(self):
         # if self.args.cam != -1:
@@ -162,7 +161,7 @@ if __name__ == "__main__":
     cfg = get_config()
     cfg.merge_from_file(args.config_deepsort)
 
-    detector = build_yolov3_detector(args.config_detection)
+    detector = build_yolov3_detector(args.config_detection, use_cuda = True)
     # detector = build_detectron2_detector(args.config_detection)
     
     with Tracker(cfg, args, path=args.input_path, detector = detector) as vdo_trk:

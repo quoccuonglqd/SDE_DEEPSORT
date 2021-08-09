@@ -14,10 +14,10 @@ class FormatedPredictor(object):
     
     def __call__(self, image):
         outputs = self.predictor(image)
-        bbox_ltrb = outputs['instances'].pred_boxes.tensor.cpu().numpy().tolist()
-        cls_ids = outputs['instances'].pred_classes.cpu().numpy().tolist()
-        cls_conf = outputs['instances'].scores.cpu().numpy().tolist()
+        bbox_ltrb = outputs['instances'].pred_boxes.tensor.cpu().numpy()
+        cls_ids = outputs['instances'].pred_classes.cpu().numpy()
+        cls_conf = outputs['instances'].scores.cpu().numpy()
         bbox_xywh = bbox_ltrb.copy()
-        bbox_xywh[2:] -= bbox_xywh[:2]
-        bbox_xywh[:2] += bbox_xywh[2:] / 2
+        bbox_xywh[:,2:] -= bbox_xywh[:,:2]
+        bbox_xywh[:,:2] += bbox_xywh[:,2:] / 2
         return bbox_xywh, cls_conf, cls_ids

@@ -1,6 +1,6 @@
 from .YOLOv3 import YOLOv3
 from detectron2.engine import FormatedPredictor
-from ..utils.parser import get_config
+from utils.parser import get_config
 from detectron2.config import get_cfg
 
 __all__ = ['build_yolov3_detector', 'build_detectron2_detector']

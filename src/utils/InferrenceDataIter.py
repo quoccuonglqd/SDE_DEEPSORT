@@ -10,7 +10,7 @@ class ImageSetIter:
         self.data = [osp.join(path,filename) for filename in listdir(path) 
             if osp.splitext(filename)[1].upper() in accepted_extension]
         self.data.sort()
-        self.im_height, self.im_width = cv.imread(self.data[0].shape[:2])
+        self.im_height, self.im_width = cv.imread(self.data[0]).shape[:2]
 
     def __getitem__(self, index):
         return cv.imread(self.data[index])
