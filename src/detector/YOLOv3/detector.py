@@ -6,7 +6,7 @@ import cv2
 from .darknet import Darknet
 from .yolo_utils import get_all_boxes, nms, post_process, xywh_to_xyxy, xyxy_to_xywh
 from .nms import boxes_nms
-
+from utils.parser import get_config
 
 class YOLOv3(object):
     def __init__(self, cfgfile, weightfile, namesfile, score_thresh=0.7, conf_thresh=0.01, nms_thresh=0.45,
@@ -69,6 +69,13 @@ class YOLOv3(object):
         with open(namesfile, 'r', encoding='utf8') as fp:
             class_names = [line.strip() for line in fp.readlines()]
         return class_names
+
+def build_yolov3_detector(cfg_path, use_cuda):
+    cfg = get_config()
+    cfg.merge_from_file(cfg_path)
+    return YOLOv3(cfg.YOLOV3.CFG, cfg.YOLOV3.WEIGHT, cfg.YOLOV3.CLASS_NAMES, 
+                    score_thresh=cfg.YOLOV3.SCORE_THRESH, nms_thresh=cfg.YOLOV3.NMS_THRESH, 
+                    is_xywh=True, use_cuda=use_cuda)
 
 
 def demo():

@@ -1,5 +1,8 @@
+from detectron2.config import get_cfg
+
 from .parallel import *
 from .defaults import *
+
 
 __all__ = [
     "FormatedPredictor",
@@ -21,3 +24,8 @@ class FormatedPredictor(object):
         bbox_xywh[:,2:] -= bbox_xywh[:,:2]
         bbox_xywh[:,:2] += bbox_xywh[:,2:] / 2
         return bbox_xywh, cls_conf, cls_ids
+
+def build_detectron2_detector(cfg_path, parallel=False):
+    cfg = get_cfg()
+    cfg.merge_from_file(cfg_path)
+    return FormatedPredictor(parallel=parallel, config = cfg)
