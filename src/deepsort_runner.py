@@ -5,8 +5,10 @@ import argparse
 import torch
 import warnings
 import numpy as np
+import sys
+sys.path.insert(0, '/content/SDE_DEEPSORT/src/detector/yolov4v5')
 
-from detector import build_yolov3_detector, build_detectron2_detector
+from detector import build_yolov3_detector, build_detectron2_detector, build_ultralityc_yolo_detector
 from deep_sort import build_tracker
 from utils.draw import draw_boxes
 from utils.parser import get_config

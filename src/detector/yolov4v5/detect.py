@@ -2,9 +2,9 @@ import argparse
 
 import torch.backends.cudnn as cudnn
 
-from models.experimental import *
-from utils.datasets import *
-from utils.utils import *
+from detector.yolov4v5.models.experimental import *
+from detector.yolov4v5.utils.datasets import *
+from detector.yolov4v5.utils.utils import *
 
 
 def detect(save_img=False):

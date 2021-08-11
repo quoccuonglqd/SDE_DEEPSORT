@@ -6,8 +6,8 @@ Usage:
 
 import argparse
 
-from models.common import *
-from utils import google_utils
+from detector.yolov4v5.models.common import *
+from detector.yolov4v5.utils import google_utils
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -1,7 +1,8 @@
 # This file contains modules common to various models
 import logging
-
-from utils.utils import *
+import sys
+# print(__name__)
+from detector.yolov4v5.utils.utils import *
 LOGGER = logging.getLogger(__name__)
 
 try:

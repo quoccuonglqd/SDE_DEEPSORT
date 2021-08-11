@@ -14,7 +14,8 @@ from PIL import Image, ExifTags
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-from utils.utils import xyxy2xywh, xywh2xyxy, torch_distributed_zero_first
+from detector.yolov4v5.utils.utils import xyxy2xywh, xywh2xyxy, torch_distributed_zero_first
+
 
 help_url = 'https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data'
 img_formats = ['.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff','.dng']

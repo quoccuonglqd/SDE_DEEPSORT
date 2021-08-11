@@ -1,9 +1,9 @@
 import argparse
 from copy import deepcopy
 
-from models.experimental import *
-from utils.torch_utils import *
-from models.common import *
+from detector.yolov4v5.models.experimental import *
+from detector.yolov4v5.utils.torch_utils import *
+from detector.yolov4v5.models.common import *
 
 
 class Detect(nn.Module):
