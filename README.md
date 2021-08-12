@@ -1,10 +1,13 @@
 # Deep Sort with PyTorch
 
-<img src="demo/faster.gif" width="200" height="200" />
+<img src="demo/faster.gif" width="350" height="350" />
+
 **Hình 1** Faster RCNN + DeepSort
-<img src="demo/yolov3.gif" width="200" height="200" />
+<img src="demo/yolov3.gif" width="350" height="350" />
+
 **Hình 2** YoloV3 + DeepSort
-<img src="demo/yolov4.gif" width="200" height="200" />
+<img src="demo/yolov4.gif" width="350" height="350" />
+
 **Hình 3** YoloV4 + DeepSort
 
 ## Introduction
