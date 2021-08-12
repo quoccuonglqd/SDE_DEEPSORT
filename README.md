@@ -1,9 +1,11 @@
 # Deep Sort with PyTorch
 
-![](demo/faster.gif)
-![](demo/yolov3.gif)
-![](demo/yolov4.gif)
-
+<img src="demo/faster.gif" width="200" height="200" />
+**Hình 1** Faster RCNN + DeepSort
+<img src="demo/yolov3.gif" width="200" height="200" />
+**Hình 2** YoloV3 + DeepSort
+<img src="demo/yolov4.gif" width="200" height="200" />
+**Hình 3** YoloV4 + DeepSort
 
 ## Introduction
 This is the implementation of object tracking algorithm DeepSort. We intend to combine some popular object detection frameworks together so that the trained models can easily be adapted to use with DeepSort.
