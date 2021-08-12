@@ -76,7 +76,7 @@ usage: python src/deepsort_runner.py --INPUT_TYPE imageset
                                      --output     OUTPUTPATH
                                      --config_deepsort configs/deep_sort.yaml    
                                      --config_detection configs/yolov3.yaml 
-
+```
 
 
 ## Training the RE-ID model
